@@ -2,7 +2,14 @@ import NumerologyProfile from '../models/NumerologyProfile.model.js';
 
 export const createNumerologyProfile = async (req, res) => {
   try {
-    const profile = new NumerologyProfile(req.body);
+    // Asigna userId a partir de userId, usuarioId o el token req.usuario
+    const userId = req.body.userId || req.body.usuarioId || req.usuario?._id;
+
+    const profile = new NumerologyProfile({
+      ...req.body,
+      userId
+    });
+
     await profile.save();
     res.status(201).json(profile);
   } catch (error) { 

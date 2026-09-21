@@ -1,8 +1,40 @@
 import Reading from '../models/Reading.model.js';
+import User from '../models/User.model.js';
 
 export const createReading = async (req, res) => {
   try {
-    const reading = new Reading(req.body);
+    const { userId, numerologistId, readingType, readingDate, summary, details } = req.body;
+
+    // Validación de Integridad Referencial (Ataque #12: Referencia a la nada)
+    if (userId) {
+      const existeUsuario = await User.findById(userId);
+      if (!existeUsuario) {
+        return res.status(400).json({
+          status: 'error',
+          mensaje: 'Integridad referencial violada: el usuario referenciado en userId no existe'
+        });
+      }
+    }
+
+    if (numerologistId) {
+      const existeNumerologo = await User.findById(numerologistId);
+      if (!existeNumerologo) {
+        return res.status(400).json({
+          status: 'error',
+          mensaje: 'Integridad referencial violada: el numerólogo referenciado en numerologistId no existe'
+        });
+      }
+    }
+
+    const reading = new Reading({
+      userId,
+      numerologistId,
+      readingType,
+      readingDate: readingDate || Date.now(),
+      summary,
+      details
+    });
+
     await reading.save();
     res.status(201).json(reading);
   } catch (error) { 
